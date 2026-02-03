@@ -29,9 +29,41 @@ import {
   AlignLeft,
   Pencil,
   Save,
-  Copy
+  Copy,
+  Users,
+  AlertTriangle,
+  Briefcase,
+  Target,
+  Layers,
+  Shield,
+  Zap,
+  Clock,
+  CheckCircle,
+  TrendingUp,
+  Building,
+  Lightbulb,
+  LucideIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
+
+// Available icons for step selection
+const stepIcons: { name: string; icon: LucideIcon }[] = [
+  { name: 'FileText', icon: FileText },
+  { name: 'DollarSign', icon: DollarSign },
+  { name: 'Users', icon: Users },
+  { name: 'AlertTriangle', icon: AlertTriangle },
+  { name: 'Briefcase', icon: Briefcase },
+  { name: 'Target', icon: Target },
+  { name: 'Layers', icon: Layers },
+  { name: 'Shield', icon: Shield },
+  { name: 'Zap', icon: Zap },
+  { name: 'Clock', icon: Clock },
+  { name: 'CheckCircle', icon: CheckCircle },
+  { name: 'TrendingUp', icon: TrendingUp },
+  { name: 'Building', icon: Building },
+  { name: 'Lightbulb', icon: Lightbulb },
+  { name: 'Settings2', icon: Settings2 },
+];
 
 const fieldTypeIcons: Record<FieldType, React.ReactNode> = {
   text: <Type className="h-4 w-4" />,
@@ -66,6 +98,7 @@ export function FormConfigAdmin() {
   // New step form state
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepDescription, setNewStepDescription] = useState('');
+  const [newStepIcon, setNewStepIcon] = useState('FileText');
   
   // New field form state
   const [newFieldLabel, setNewFieldLabel] = useState('');
@@ -101,7 +134,7 @@ export function FormConfigAdmin() {
       id: `step-${Date.now()}`,
       title: newStepTitle,
       description: newStepDescription,
-      icon: 'FileText',
+      icon: newStepIcon,
       order: config.steps.length + 1,
       fields: [],
     };
@@ -114,6 +147,7 @@ export function FormConfigAdmin() {
 
     setNewStepTitle('');
     setNewStepDescription('');
+    setNewStepIcon('FileText');
     setIsAddStepOpen(false);
     toast.success('Step added successfully');
   };
@@ -245,6 +279,26 @@ export function FormConfigAdmin() {
                     value={newStepDescription}
                     onChange={(e) => setNewStepDescription(e.target.value)}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label>Step Icon</Label>
+                  <div className="grid grid-cols-5 gap-2 p-2 border rounded-lg bg-secondary/20">
+                    {stepIcons.map(({ name, icon: Icon }) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => setNewStepIcon(name)}
+                        className={`flex items-center justify-center p-2 rounded-md transition-colors ${
+                          newStepIcon === name 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'hover:bg-secondary'
+                        }`}
+                        title={name}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               <DialogFooter>
