@@ -55,12 +55,9 @@ export function AppLayout({ children }: AppLayoutProps) {
               alt="ExecHub Logo" 
               className="h-10 w-10 rounded-lg object-cover"
             />
-            <div>
-              <h1 className="font-display text-xl font-bold text-sidebar-foreground">
-                ExecHub
-              </h1>
-              <p className="text-xs text-sidebar-foreground/60">Initiative Portal</p>
-            </div>
+            <h1 className="font-display text-xl font-bold text-sidebar-foreground">
+              ExecHub
+            </h1>
           </Link>
 
           {/* Navigation */}
