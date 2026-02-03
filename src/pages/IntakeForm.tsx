@@ -13,8 +13,28 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, ArrowRight, Check, FileText, DollarSign, Users, AlertTriangle, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, FileText, DollarSign, Users, AlertTriangle, Loader2, CheckCircle, XCircle, X, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Available domains for selection
+const AVAILABLE_DOMAINS = [
+  { value: 'CFP', label: 'CFP' },
+  { value: 'CPNS', label: 'CPNS' },
+  { value: 'GTI', label: 'GTI' },
+  { value: 'GTO', label: 'GTO' },
+  { value: 'Enterprise', label: 'Enterprise' },
+  { value: 'Infrastructure', label: 'Infrastructure' },
+  { value: 'Security', label: 'Security' },
+  { value: 'Data', label: 'Data & Analytics' },
+];
+
+// Domain investment values structure
+interface DomainInvestment {
+  existingHeads: number;
+  deferredIncremental: number;
+  newAsk: number;
+  nextPhaseAsk: number;
+}
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(150, 'Title must be under 150 characters'),
@@ -32,14 +52,6 @@ const formSchema = z.object({
   deferredIncremental: z.number().min(0),
   totalNewAsk: z.number().min(0),
   nextPhaseAsk: z.number().min(0),
-  cfpExisting: z.number().min(0),
-  cfpDeferred: z.number().min(0),
-  cfpNewAsk: z.number().min(0),
-  cfpNextPhase: z.number().min(0),
-  cpnsExisting: z.number().min(0),
-  cpnsDeferred: z.number().min(0),
-  cpnsNewAsk: z.number().min(0),
-  cpnsNextPhase: z.number().min(0),
   nonLaborAsk: z.string().max(1500, 'Non-labor ask must be under 1500 characters'),
   workInScope: z.string().min(1, 'Work in scope is required').max(3000, 'Work in scope must be under 3000 characters'),
   valueROI: z.string().min(1, 'Value/ROI measure is required').max(2000, 'Value/ROI must be under 2000 characters'),
@@ -47,7 +59,6 @@ const formSchema = z.object({
   dependencies: z.string().max(1500, 'Dependencies must be under 1500 characters'),
   resourceAvailability: z.string().max(1000, 'Resource availability must be under 1000 characters'),
 });
-
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -72,6 +83,10 @@ export default function IntakeForm() {
   const [sealIdInput, setSealIdInput] = useState('');
   const [validatedSealIds, setValidatedSealIds] = useState<SealValidation[]>([]);
   const [isValidatingSeal, setIsValidatingSeal] = useState(false);
+  
+  // Domain investments state
+  const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
+  const [domainInvestments, setDomainInvestments] = useState<Record<string, DomainInvestment>>({});
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -86,19 +101,41 @@ export default function IntakeForm() {
       deferredIncremental: 0,
       totalNewAsk: 0,
       nextPhaseAsk: 0,
-      cfpExisting: 0,
-      cfpDeferred: 0,
-      cfpNewAsk: 0,
-      cfpNextPhase: 0,
-      cpnsExisting: 0,
-      cpnsDeferred: 0,
-      cpnsNewAsk: 0,
-      cpnsNextPhase: 0,
       nonLaborAsk: '',
       dependencies: '',
       resourceAvailability: '',
     },
   });
+
+  // Handle adding a domain
+  const handleAddDomain = (domain: string) => {
+    if (!selectedDomains.includes(domain)) {
+      setSelectedDomains([...selectedDomains, domain]);
+      setDomainInvestments({
+        ...domainInvestments,
+        [domain]: { existingHeads: 0, deferredIncremental: 0, newAsk: 0, nextPhaseAsk: 0 }
+      });
+    }
+  };
+
+  // Handle removing a domain
+  const handleRemoveDomain = (domain: string) => {
+    setSelectedDomains(selectedDomains.filter(d => d !== domain));
+    const newInvestments = { ...domainInvestments };
+    delete newInvestments[domain];
+    setDomainInvestments(newInvestments);
+  };
+
+  // Handle domain investment value change
+  const handleDomainValueChange = (domain: string, field: keyof DomainInvestment, value: number) => {
+    setDomainInvestments({
+      ...domainInvestments,
+      [domain]: {
+        ...domainInvestments[domain],
+        [field]: value
+      }
+    });
+  };
 
   // Mock API call to validate SEAL ID
   const validateSealId = async (sealId: string): Promise<boolean> => {
@@ -167,7 +204,7 @@ export default function IntakeForm() {
 
   const onSubmit = (data: FormData) => {
     const initiativeId = generateInitiativeId();
-    console.log('Form submitted:', { ...data, initiativeId });
+    console.log('Form submitted:', { ...data, initiativeId, domainInvestments });
     toast.success('Initiative submitted successfully!', {
       description: `Initiative ${initiativeId} has been sent for review.`,
     });
@@ -497,72 +534,95 @@ export default function IntakeForm() {
 
               <Separator />
 
-              <div>
-                <h4 className="mb-4 font-medium text-foreground">Domain: CFP</h4>
-                <div className="grid gap-4 sm:grid-cols-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs">Existing Heads</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cfpExisting', { valueAsNumber: true })}
-                    />
+              {/* Domain Selector */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-foreground">Domain Investments</h4>
+                    <p className="text-sm text-muted-foreground">Select domains and enter investment values for each</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Deferred Inc.</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cfpDeferred', { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">New Ask</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cfpNewAsk', { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Next Phase</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cfpNextPhase', { valueAsNumber: true })}
-                    />
-                  </div>
+                  <Select onValueChange={handleAddDomain} value="">
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Add domain..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AVAILABLE_DOMAINS.filter(d => !selectedDomains.includes(d.value)).map(domain => (
+                        <SelectItem key={domain.value} value={domain.value}>
+                          <div className="flex items-center gap-2">
+                            <Plus className="h-4 w-4" />
+                            {domain.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
 
-              <div>
-                <h4 className="mb-4 font-medium text-foreground">Domain: CPNS</h4>
-                <div className="grid gap-4 sm:grid-cols-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs">Existing Heads</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cpnsExisting', { valueAsNumber: true })}
-                    />
+                {selectedDomains.length === 0 && (
+                  <div className="rounded-lg border border-dashed p-6 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      No domains selected. Use the dropdown above to add domains.
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Deferred Inc.</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cpnsDeferred', { valueAsNumber: true })}
-                    />
+                )}
+
+                {selectedDomains.map(domain => (
+                  <div key={domain} className="rounded-lg border bg-secondary/20 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium text-foreground flex items-center gap-2">
+                        <Badge variant="outline">{domain}</Badge>
+                        {AVAILABLE_DOMAINS.find(d => d.value === domain)?.label}
+                      </h5>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveDomain(domain)}
+                        className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-4">
+                      <div className="space-y-2">
+                        <Label className="text-xs">Existing Heads</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={domainInvestments[domain]?.existingHeads || 0}
+                          onChange={(e) => handleDomainValueChange(domain, 'existingHeads', Number(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Deferred Inc.</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={domainInvestments[domain]?.deferredIncremental || 0}
+                          onChange={(e) => handleDomainValueChange(domain, 'deferredIncremental', Number(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">New Ask</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={domainInvestments[domain]?.newAsk || 0}
+                          onChange={(e) => handleDomainValueChange(domain, 'newAsk', Number(e.target.value))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Next Phase Ask</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={domainInvestments[domain]?.nextPhaseAsk || 0}
+                          onChange={(e) => handleDomainValueChange(domain, 'nextPhaseAsk', Number(e.target.value))}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">New Ask</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cpnsNewAsk', { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs">Next Phase</Label>
-                    <Input
-                      type="number"
-                      {...form.register('cpnsNextPhase', { valueAsNumber: true })}
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
 
               <Separator />
