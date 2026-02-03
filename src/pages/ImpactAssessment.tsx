@@ -117,10 +117,10 @@ export default function ImpactAssessment() {
       )}>
         {/* Title Card */}
         <Card className="executive-card overflow-hidden">
-          <div className="executive-header px-6 py-8 text-primary-foreground">
-            <p className="text-sm font-mono text-primary-foreground/70 mb-2">{initiative.initiativeId}</p>
-            <h2 className="font-display text-2xl font-bold">{initiative.title}</h2>
-            <p className="mt-2 text-primary-foreground/80">{initiative.businessCase}</p>
+          <div className="bg-gradient-to-r from-primary to-primary/80 px-6 py-8">
+            <p className="text-sm font-mono text-background/70 mb-2">{initiative.initiativeId}</p>
+            <h2 className="font-display text-2xl font-bold text-background">{initiative.title}</h2>
+            <p className="mt-2 text-background/80">{initiative.businessCase}</p>
           </div>
           <CardContent className="p-6">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
