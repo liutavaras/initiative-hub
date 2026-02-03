@@ -104,37 +104,37 @@ export default function Admin() {
           <div className="grid gap-4 sm:grid-cols-3">
             <Card className="executive-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-base font-semibold text-muted-foreground">
                   Total Users
                 </CardTitle>
-                <UsersIcon className="h-4 w-4 text-muted-foreground" />
+                <UsersIcon className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">{users.length}</div>
+                <div className="text-3xl font-bold text-foreground">{users.length}</div>
               </CardContent>
             </Card>
             
             <Card className="executive-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-base font-semibold text-muted-foreground">
                   Approvers
                 </CardTitle>
-                <UserCheck className="h-4 w-4 text-success" />
+                <UserCheck className="h-5 w-5 text-success" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-success">{approvers.length}</div>
+                <div className="text-3xl font-bold text-success">{approvers.length}</div>
               </CardContent>
             </Card>
             
             <Card className="executive-card">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-base font-semibold text-muted-foreground">
                   Requesters
                 </CardTitle>
-                <UserPlus className="h-4 w-4 text-primary" />
+                <UserPlus className="h-5 w-5 text-primary" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-primary">{requesters.length}</div>
+                <div className="text-3xl font-bold text-primary">{requesters.length}</div>
               </CardContent>
             </Card>
           </div>
