@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockInitiatives } from '@/data/mockData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Separator } from '@/components/ui/separator';
@@ -26,9 +27,11 @@ import {
   BarChart3,
   Calendar,
   Building2,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const COLORS = {
   approved: 'hsl(145 60% 40%)',
@@ -104,6 +107,59 @@ export default function Reports() {
   const uniqueOrigins = useMemo(() => {
     return [...new Set(mockInitiatives.map(i => i.lineOfBusiness).filter(Boolean))];
   }, []);
+
+  const exportToCSV = () => {
+    const headers = [
+      'Initiative ID',
+      'Title',
+      'Status',
+      'Category',
+      'Owner',
+      'Submitted By',
+      'Submitted At',
+      'ROM',
+      'Timeframe',
+      'Work Type',
+      'Line of Business',
+      'Assessor Name',
+      'Assessed At'
+    ];
+
+    const csvData = filteredInitiatives.map(i => [
+      i.initiativeId,
+      `"${i.title.replace(/"/g, '""')}"`,
+      i.status,
+      i.category,
+      i.ownerName,
+      i.submittedBy,
+      format(new Date(i.submittedAt), 'yyyy-MM-dd'),
+      i.scopeSizing,
+      i.timeframe,
+      i.workType,
+      i.lineOfBusiness || '',
+      i.assessorName || '',
+      i.assessedAt ? format(new Date(i.assessedAt), 'yyyy-MM-dd') : ''
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `initiatives_export_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Export successful', {
+      description: `${filteredInitiatives.length} initiatives exported to CSV`
+    });
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -408,6 +464,22 @@ export default function Reports() {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Export Section */}
+      <Card className="executive-card">
+        <CardContent className="flex items-center justify-between py-6">
+          <div>
+            <h3 className="font-medium text-foreground">Export Data</h3>
+            <p className="text-sm text-muted-foreground">
+              Download all {filteredInitiatives.length} initiatives as a CSV file
+            </p>
+          </div>
+          <Button onClick={exportToCSV} className="gap-2">
+            <Download className="h-4 w-4" />
+            Export to CSV
+          </Button>
         </CardContent>
       </Card>
     </div>

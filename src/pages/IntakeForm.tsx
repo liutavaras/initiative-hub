@@ -11,8 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, ArrowRight, Check, FileText, DollarSign, Users, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, FileText, DollarSign, Users, AlertTriangle, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
@@ -24,6 +25,7 @@ const formSchema = z.object({
   category: z.enum(['Mandatory', 'Discretionary', 'Regulatory']),
   workType: z.enum(['New', 'Expansion', 'Change to Existing']),
   requesterStakeholders: z.string().min(1, 'At least one stakeholder required'),
+  sealIds: z.string().optional(),
   scopeSizing: z.number().min(0, 'ROM must be positive'),
   timeframe: z.enum(['Multi-Year', 'One Year', '6 Months', 'Quarter', 'Immediate']),
   existingHeadsCommitted: z.number().min(0),
@@ -48,6 +50,14 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+// Mock SEAL IDs that "exist" in the system for demo purposes
+const MOCK_VALID_SEAL_IDS = ['SEAL-001', 'SEAL-002', 'SEAL-003', 'SEAL-100', 'SEAL-200', 'SEAL-500'];
+
+interface SealValidation {
+  id: string;
+  status: 'pending' | 'valid' | 'invalid';
+}
+
 const steps = [
   { id: 1, title: 'Basic Info', icon: FileText },
   { id: 2, title: 'Investment', icon: DollarSign },
@@ -58,6 +68,9 @@ const steps = [
 export default function IntakeForm() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [sealIdInput, setSealIdInput] = useState('');
+  const [validatedSealIds, setValidatedSealIds] = useState<SealValidation[]>([]);
+  const [isValidatingSeal, setIsValidatingSeal] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -66,6 +79,7 @@ export default function IntakeForm() {
       category: 'Discretionary',
       workType: 'New',
       timeframe: 'One Year',
+      sealIds: '',
       scopeSizing: 0,
       existingHeadsCommitted: 0,
       deferredIncremental: 0,
@@ -85,9 +99,68 @@ export default function IntakeForm() {
     },
   });
 
+  // Mock API call to validate SEAL ID
+  const validateSealId = async (sealId: string): Promise<boolean> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    // Mock validation - check if ID exists in our mock list
+    return MOCK_VALID_SEAL_IDS.includes(sealId.toUpperCase());
+  };
+
+  const handleAddSealId = async () => {
+    const trimmedId = sealIdInput.trim().toUpperCase();
+    if (!trimmedId) return;
+    
+    // Check if already added
+    if (validatedSealIds.some(s => s.id === trimmedId)) {
+      toast.error('Seal ID already added');
+      return;
+    }
+
+    setIsValidatingSeal(true);
+    setValidatedSealIds(prev => [...prev, { id: trimmedId, status: 'pending' }]);
+    
+    try {
+      const isValid = await validateSealId(trimmedId);
+      
+      setValidatedSealIds(prev => 
+        prev.map(s => 
+          s.id === trimmedId 
+            ? { ...s, status: isValid ? 'valid' : 'invalid' } 
+            : s
+        )
+      );
+      
+      if (isValid) {
+        // Update form value with valid seal IDs
+        const validIds = [...validatedSealIds.filter(s => s.status === 'valid').map(s => s.id), trimmedId];
+        form.setValue('sealIds', validIds.join(', '));
+        toast.success(`SEAL ID ${trimmedId} validated successfully`);
+      } else {
+        toast.error(`SEAL ID ${trimmedId} not found in SEAL server`);
+      }
+    } catch (error) {
+      setValidatedSealIds(prev => 
+        prev.map(s => s.id === trimmedId ? { ...s, status: 'invalid' } : s)
+      );
+      toast.error('Failed to validate SEAL ID');
+    }
+    
+    setIsValidatingSeal(false);
+    setSealIdInput('');
+  };
+
+  const handleRemoveSealId = (idToRemove: string) => {
+    setValidatedSealIds(prev => prev.filter(s => s.id !== idToRemove));
+    const validIds = validatedSealIds
+      .filter(s => s.status === 'valid' && s.id !== idToRemove)
+      .map(s => s.id);
+    form.setValue('sealIds', validIds.join(', '));
+  };
+
   const generateInitiativeId = () => {
     const year = new Date().getFullYear();
-    const randomNum = Math.floor(Math.random() * 900) + 100; // 3-digit random number
+    const randomNum = Math.floor(Math.random() * 900) + 100;
     return `INI-${year}-${randomNum}`;
   };
 
@@ -216,6 +289,66 @@ export default function IntakeForm() {
                     {...form.register('requesterStakeholders')}
                   />
                 </div>
+              </div>
+
+              {/* SEAL ID Field */}
+              <div className="space-y-2">
+                <Label htmlFor="sealIds">SEAL ID(s) <span className="text-muted-foreground text-xs">(Optional)</span></Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Enter SEAL IDs this initiative is associated with. Each ID will be validated against the SEAL server.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    id="sealIdInput"
+                    placeholder="e.g., SEAL-001"
+                    value={sealIdInput}
+                    onChange={(e) => setSealIdInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddSealId();
+                      }
+                    }}
+                  />
+                  <Button 
+                    type="button" 
+                    variant="secondary" 
+                    onClick={handleAddSealId}
+                    disabled={isValidatingSeal || !sealIdInput.trim()}
+                  >
+                    {isValidatingSeal ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Validate & Add'
+                    )}
+                  </Button>
+                </div>
+                {validatedSealIds.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {validatedSealIds.map((seal) => (
+                      <Badge
+                        key={seal.id}
+                        variant={seal.status === 'valid' ? 'default' : seal.status === 'invalid' ? 'destructive' : 'secondary'}
+                        className="flex items-center gap-1.5 px-3 py-1"
+                      >
+                        {seal.status === 'pending' && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {seal.status === 'valid' && <CheckCircle className="h-3 w-3" />}
+                        {seal.status === 'invalid' && <XCircle className="h-3 w-3" />}
+                        {seal.id}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSealId(seal.id)}
+                          className="ml-1 hover:text-destructive-foreground"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Valid mock IDs for testing: SEAL-001, SEAL-002, SEAL-003, SEAL-100, SEAL-200, SEAL-500
+                </p>
               </div>
 
               <div className="space-y-2">
