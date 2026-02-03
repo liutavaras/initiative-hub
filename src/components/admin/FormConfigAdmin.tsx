@@ -100,7 +100,8 @@ export function FormConfigAdmin() {
   const [isAddStepOpen, setIsAddStepOpen] = useState(false);
   const [isAddFieldOpen, setIsAddFieldOpen] = useState(false);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
-  const [editingField, setEditingField] = useState<FormField | null>(null);
+  const [editingField, setEditingField] = useState<{ stepId: string; field: FormField } | null>(null);
+  const [editingStep, setEditingStep] = useState<FormStep | null>(null);
   
   // New step form state
   const [newStepTitle, setNewStepTitle] = useState('');
@@ -117,6 +118,17 @@ export function FormConfigAdmin() {
   const [useDefaultDomainConfig, setUseDefaultDomainConfig] = useState(true);
   const [customDomainOptions, setCustomDomainOptions] = useState('');
   const [customSubFields, setCustomSubFields] = useState<SubField[]>([]);
+  
+  // Edit field form state
+  const [editFieldLabel, setEditFieldLabel] = useState('');
+  const [editFieldRequired, setEditFieldRequired] = useState(false);
+  const [editFieldPlaceholder, setEditFieldPlaceholder] = useState('');
+  const [editFieldOptions, setEditFieldOptions] = useState('');
+  
+  // Edit step form state
+  const [editStepTitle, setEditStepTitle] = useState('');
+  const [editStepDescription, setEditStepDescription] = useState('');
+  const [editStepIcon, setEditStepIcon] = useState('FileText');
 
   const toggleStep = (stepId: string) => {
     setExpandedSteps(prev => 
@@ -269,6 +281,81 @@ export function FormConfigAdmin() {
     setIsAddFieldOpen(true);
   };
 
+  const openEditFieldDialog = (stepId: string, field: FormField) => {
+    setEditingField({ stepId, field });
+    setEditFieldLabel(field.label);
+    setEditFieldRequired(field.required);
+    setEditFieldPlaceholder(field.placeholder || '');
+    setEditFieldOptions(field.options?.map(o => o.label).join(', ') || '');
+  };
+
+  const handleUpdateField = () => {
+    if (!editingField || !editFieldLabel) {
+      toast.error('Field label is required');
+      return;
+    }
+
+    setConfig({
+      ...config,
+      steps: config.steps.map(step => 
+        step.id === editingField.stepId
+          ? { 
+              ...step, 
+              fields: step.fields.map(f => 
+                f.id === editingField.field.id
+                  ? { 
+                      ...f, 
+                      label: editFieldLabel,
+                      required: editFieldRequired,
+                      placeholder: editFieldPlaceholder || undefined,
+                      options: (f.type === 'select' || f.type === 'multiselect') && editFieldOptions
+                        ? editFieldOptions.split(',').map(opt => ({ label: opt.trim(), value: opt.trim() }))
+                        : f.options,
+                    }
+                  : f
+              )
+            }
+          : step
+      ),
+      updatedAt: new Date().toISOString(),
+    });
+
+    setEditingField(null);
+    toast.success('Field updated successfully');
+  };
+
+  const openEditStepDialog = (step: FormStep) => {
+    setEditingStep(step);
+    setEditStepTitle(step.title);
+    setEditStepDescription(step.description || '');
+    setEditStepIcon(step.icon);
+  };
+
+  const handleUpdateStep = () => {
+    if (!editingStep || !editStepTitle) {
+      toast.error('Step title is required');
+      return;
+    }
+
+    setConfig({
+      ...config,
+      steps: config.steps.map(step => 
+        step.id === editingStep.id
+          ? { 
+              ...step, 
+              title: editStepTitle,
+              description: editStepDescription || undefined,
+              icon: editStepIcon,
+            }
+          : step
+      ),
+      updatedAt: new Date().toISOString(),
+    });
+
+    setEditingStep(null);
+    toast.success('Step updated successfully');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -377,6 +464,14 @@ export function FormConfigAdmin() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => { e.stopPropagation(); openEditStepDialog(step); }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={(e) => { e.stopPropagation(); handleRemoveStep(step.id); }}
                       >
@@ -445,7 +540,7 @@ export function FormConfigAdmin() {
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7"
-                              onClick={() => setEditingField(field)}
+                              onClick={() => openEditFieldDialog(step.id, field)}
                             >
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
@@ -631,6 +726,131 @@ export function FormConfigAdmin() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddFieldOpen(false)}>Cancel</Button>
             <Button onClick={handleAddField}>Add Field</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Field Dialog */}
+      <Dialog open={!!editingField} onOpenChange={(open) => !open && setEditingField(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Field</DialogTitle>
+            <DialogDescription>
+              Update the field configuration
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Field Label *</Label>
+              <Input 
+                placeholder="e.g., Priority Level"
+                value={editFieldLabel}
+                onChange={(e) => setEditFieldLabel(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Field Name (Database Column)</Label>
+              <Input 
+                value={editingField?.field.name || ''}
+                disabled
+                className="font-mono text-sm bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                Field name cannot be changed after creation
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Field Type</Label>
+              <Input 
+                value={editingField ? fieldTypeLabels[editingField.field.type] : ''}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            {editingField && (editingField.field.type === 'select' || editingField.field.type === 'multiselect') && (
+              <div className="space-y-2">
+                <Label>Options (comma-separated)</Label>
+                <Input 
+                  placeholder="Option 1, Option 2, Option 3"
+                  value={editFieldOptions}
+                  onChange={(e) => setEditFieldOptions(e.target.value)}
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Placeholder</Label>
+              <Input 
+                placeholder="Enter placeholder text"
+                value={editFieldPlaceholder}
+                onChange={(e) => setEditFieldPlaceholder(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="editRequired">Required Field</Label>
+              <Switch 
+                id="editRequired"
+                checked={editFieldRequired}
+                onCheckedChange={setEditFieldRequired}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingField(null)}>Cancel</Button>
+            <Button onClick={handleUpdateField}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Step Dialog */}
+      <Dialog open={!!editingStep} onOpenChange={(open) => !open && setEditingStep(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Step</DialogTitle>
+            <DialogDescription>
+              Update the step title, description, and icon
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Step Title *</Label>
+              <Input 
+                placeholder="e.g., Technical Requirements"
+                value={editStepTitle}
+                onChange={(e) => setEditStepTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description (Optional)</Label>
+              <Input 
+                placeholder="Brief description of this step"
+                value={editStepDescription}
+                onChange={(e) => setEditStepDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Step Icon</Label>
+              <div className="grid grid-cols-5 gap-2 p-2 border rounded-lg bg-secondary/20">
+                {stepIcons.map(({ name, icon: Icon }) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setEditStepIcon(name)}
+                    className={`flex items-center justify-center p-2 rounded-md transition-colors ${
+                      editStepIcon === name 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'hover:bg-secondary'
+                    }`}
+                    title={name}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingStep(null)}>Cancel</Button>
+            <Button onClick={handleUpdateStep}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
