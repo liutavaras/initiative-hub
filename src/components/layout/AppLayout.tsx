@@ -99,9 +99,15 @@ export function AppLayout({ children }: AppLayoutProps) {
               <p className="text-xs font-medium text-sidebar-accent-foreground">
                 Need Help?
               </p>
-              <p className="mt-1 text-xs text-sidebar-foreground/60">
+              <p className="mt-1 text-xs text-sidebar-foreground/60 mb-3">
                 Contact IT Support for assistance with the portal.
               </p>
+              <a 
+                href="mailto:ip_demand_management@email.com"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors w-full"
+              >
+                Contact Support
+              </a>
             </div>
           </div>
         </div>
