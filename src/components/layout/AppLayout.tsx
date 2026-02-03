@@ -45,7 +45,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-20 items-center gap-3 border-b border-sidebar-border px-6">
+          <Link 
+            to="/" 
+            className="flex h-20 items-center gap-3 border-b border-sidebar-border px-6 hover:bg-sidebar-accent/50 transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary">
               <Briefcase className="h-5 w-5 text-sidebar-primary-foreground" />
             </div>
@@ -55,7 +59,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               </h1>
               <p className="text-xs text-sidebar-foreground/60">Initiative Portal</p>
             </div>
-          </div>
+          </Link>
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-4 py-6">
