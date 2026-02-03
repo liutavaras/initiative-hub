@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { 
   Search, 
@@ -16,8 +16,10 @@ import {
   UserCheck, 
   UserPlus, 
   Shield,
-  Users as UsersIcon
+  Users as UsersIcon,
+  Settings2
 } from 'lucide-react';
+import { FormConfigAdmin } from '@/components/admin/FormConfigAdmin';
 
 export default function Admin() {
   const [users, setUsers] = useState<User[]>(mockUsers);
@@ -76,291 +78,313 @@ export default function Admin() {
       {/* Header */}
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground">
-          User Administration
+          Administration
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Manage user permissions for initiative approvals and submissions
+          Manage users, permissions, and form configuration
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="executive-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Users
-            </CardTitle>
-            <UsersIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{users.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="executive-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Approvers
-            </CardTitle>
-            <UserCheck className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{approvers.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="executive-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Requesters
-            </CardTitle>
-            <UserPlus className="h-4 w-4 text-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-accent">{requesters.length}</div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Tabs */}
+      <Tabs defaultValue="users" className="space-y-6">
+        <TabsList className="bg-secondary">
+          <TabsTrigger value="users" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <UsersIcon className="h-4 w-4" />
+            User Permissions
+          </TabsTrigger>
+          <TabsTrigger value="form-config" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Settings2 className="h-4 w-4" />
+            Form Configuration
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Add User */}
-        <Card className="executive-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              Add New User
-            </CardTitle>
-            <CardDescription>
-              Grant permission to submit or approve initiatives
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="userName">User Name</Label>
-                <Input
-                  id="userName"
-                  placeholder="Full name"
-                  value={newUserName}
-                  onChange={(e) => setNewUserName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="userSid">SID</Label>
-                <Input
-                  id="userSid"
-                  placeholder="SID123"
-                  value={newUserSid}
-                  onChange={(e) => setNewUserSid(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <Select value={newUserRole} onValueChange={(v) => setNewUserRole(v as any)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="requester">Requester</SelectItem>
-                    <SelectItem value="approver">Approver</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select value={newUserCategory} onValueChange={setNewUserCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="LOB">LOB</SelectItem>
-                    <SelectItem value="GTLT">GTLT</SelectItem>
-                    <SelectItem value="Product">Product</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button onClick={handleAddUser} className="w-full gap-2">
-              <Plus className="h-4 w-4" />
-              Add User
-            </Button>
-          </CardContent>
-        </Card>
+        {/* User Permissions Tab */}
+        <TabsContent value="users" className="space-y-6">
+          {/* Stats */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card className="executive-card">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Users
+                </CardTitle>
+                <UsersIcon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">{users.length}</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="executive-card">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Approvers
+                </CardTitle>
+                <UserCheck className="h-4 w-4 text-success" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-success">{approvers.length}</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="executive-card">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Requesters
+                </CardTitle>
+                <UserPlus className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary">{requesters.length}</div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Search Users */}
-        <Card className="executive-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Search Users
-            </CardTitle>
-            <CardDescription>
-              Find and manage existing user permissions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by name or SID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="max-h-[300px] space-y-2 overflow-y-auto">
-              {filteredUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-secondary/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
-                      <span className="text-xs font-medium text-primary-foreground">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.sid}</p>
-                    </div>
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Add User */}
+            <Card className="executive-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="h-5 w-5" />
+                  Add New User
+                </CardTitle>
+                <CardDescription>
+                  Grant permission to submit or approve initiatives
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="userName">User Name</Label>
+                    <Input
+                      id="userName"
+                      placeholder="Full name"
+                      value={newUserName}
+                      onChange={(e) => setNewUserName(e.target.value)}
+                    />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant={user.role === 'approver' ? 'default' : 'secondary'}
-                      className="capitalize"
-                    >
-                      {user.role}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {user.category}
-                    </Badge>
+                  <div className="space-y-2">
+                    <Label htmlFor="userSid">SID</Label>
+                    <Input
+                      id="userSid"
+                      placeholder="SID123"
+                      value={newUserSid}
+                      onChange={(e) => setNewUserSid(e.target.value)}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* User Lists */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Approvers List */}
-        <Card className="executive-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-success">
-              <Shield className="h-5 w-5" />
-              Approvers ({approvers.length})
-            </CardTitle>
-            <CardDescription>
-              Users who can approve or deny initiatives
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {approvers.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-success">
-                      <span className="text-xs font-medium text-success-foreground">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.sid} • {user.category}</p>
-                    </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Role</Label>
+                    <Select value={newUserRole} onValueChange={(v) => setNewUserRole(v as any)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="requester">Requester</SelectItem>
+                        <SelectItem value="approver">Approver</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleToggleRole(user.id)}
-                    >
-                      Demote
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => handleRemoveUser(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <Select value={newUserCategory} onValueChange={setNewUserCategory}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LOB">LOB</SelectItem>
+                        <SelectItem value="GTLT">GTLT</SelectItem>
+                        <SelectItem value="Product">Product</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              ))}
-              {approvers.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-4">
-                  No approvers configured
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <Button onClick={handleAddUser} className="w-full gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add User
+                </Button>
+              </CardContent>
+            </Card>
 
-        {/* Requesters List */}
-        <Card className="executive-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-accent">
-              <UserPlus className="h-5 w-5" />
-              Requesters ({requesters.length})
-            </CardTitle>
-            <CardDescription>
-              Users who can submit new initiatives
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {requesters.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between rounded-lg border border-accent/20 bg-accent/5 p-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                      <span className="text-xs font-medium text-accent-foreground">
-                        {user.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.sid} • {user.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleToggleRole(user.id)}
-                    >
-                      Promote
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => handleRemoveUser(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {/* Search Users */}
+            <Card className="executive-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Search Users
+                </CardTitle>
+                <CardDescription>
+                  Find and manage existing user permissions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name or SID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-              ))}
-              {requesters.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-4">
-                  No requesters configured
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="max-h-[300px] space-y-2 overflow-y-auto">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-secondary/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
+                          <span className="text-xs font-medium text-primary-foreground">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.sid}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={user.role === 'approver' ? 'default' : 'secondary'}
+                          className="capitalize"
+                        >
+                          {user.role}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {user.category}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* User Lists */}
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Approvers List */}
+            <Card className="executive-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-success">
+                  <Shield className="h-5 w-5" />
+                  Approvers ({approvers.length})
+                </CardTitle>
+                <CardDescription>
+                  Users who can approve or deny initiatives
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {approvers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between rounded-lg border border-success/20 bg-success/5 p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-success">
+                          <span className="text-xs font-medium text-success-foreground">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.sid} • {user.category}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleRole(user.id)}
+                        >
+                          Demote
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleRemoveUser(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {approvers.length === 0 && (
+                    <p className="text-center text-sm text-muted-foreground py-4">
+                      No approvers configured
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Requesters List */}
+            <Card className="executive-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-primary">
+                  <UserPlus className="h-5 w-5" />
+                  Requesters ({requesters.length})
+                </CardTitle>
+                <CardDescription>
+                  Users who can submit new initiatives
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {requesters.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+                          <span className="text-xs font-medium text-primary-foreground">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{user.name}</p>
+                          <p className="text-xs text-muted-foreground">{user.sid} • {user.category}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleRole(user.id)}
+                        >
+                          Promote
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleRemoveUser(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {requesters.length === 0 && (
+                    <p className="text-center text-sm text-muted-foreground py-4">
+                      No requesters configured
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Form Configuration Tab */}
+        <TabsContent value="form-config">
+          <FormConfigAdmin />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
