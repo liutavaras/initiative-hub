@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { mockFormConfig } from '@/data/mockFormConfig';
-import { FormConfig, FormStep, FormField, FieldType } from '@/types/formConfig';
+import { FormConfig, FormStep, FormField, FieldType, SubField, DEFAULT_DOMAIN_OPTIONS, DEFAULT_DOMAIN_SUBFIELDS } from '@/types/formConfig';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -42,7 +43,9 @@ import {
   TrendingUp,
   Building,
   Lightbulb,
-  LucideIcon
+  LucideIcon,
+  LayoutGrid,
+  Repeat
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -74,6 +77,8 @@ const fieldTypeIcons: Record<FieldType, React.ReactNode> = {
   date: <Calendar className="h-4 w-4" />,
   multiselect: <List className="h-4 w-4" />,
   currency: <DollarSign className="h-4 w-4" />,
+  'domain-investment': <LayoutGrid className="h-4 w-4" />,
+  'repeatable-group': <Repeat className="h-4 w-4" />,
 };
 
 const fieldTypeLabels: Record<FieldType, string> = {
@@ -85,6 +90,8 @@ const fieldTypeLabels: Record<FieldType, string> = {
   date: 'Date',
   multiselect: 'Multi-Select',
   currency: 'Currency',
+  'domain-investment': 'Domain Investment',
+  'repeatable-group': 'Repeatable Group',
 };
 
 export function FormConfigAdmin() {
@@ -107,6 +114,9 @@ export function FormConfigAdmin() {
   const [newFieldRequired, setNewFieldRequired] = useState(false);
   const [newFieldPlaceholder, setNewFieldPlaceholder] = useState('');
   const [newFieldOptions, setNewFieldOptions] = useState('');
+  const [useDefaultDomainConfig, setUseDefaultDomainConfig] = useState(true);
+  const [customDomainOptions, setCustomDomainOptions] = useState('');
+  const [customSubFields, setCustomSubFields] = useState<SubField[]>([]);
 
   const toggleStep = (stepId: string) => {
     setExpandedSteps(prev => 
@@ -174,6 +184,26 @@ export function FormConfigAdmin() {
 
     const fieldName = newFieldName || generateFieldName(newFieldLabel);
     
+    // Determine options and subFields based on field type
+    let options = newFieldOptions 
+      ? newFieldOptions.split(',').map(opt => ({ label: opt.trim(), value: opt.trim() }))
+      : undefined;
+    
+    let subFields: SubField[] | undefined = undefined;
+    
+    // For domain-investment type, set up domain options and sub-fields
+    if (newFieldType === 'domain-investment') {
+      if (useDefaultDomainConfig) {
+        options = DEFAULT_DOMAIN_OPTIONS;
+        subFields = DEFAULT_DOMAIN_SUBFIELDS;
+      } else {
+        options = customDomainOptions
+          ? customDomainOptions.split(',').map(opt => ({ label: opt.trim(), value: opt.trim() }))
+          : DEFAULT_DOMAIN_OPTIONS;
+        subFields = customSubFields.length > 0 ? customSubFields : DEFAULT_DOMAIN_SUBFIELDS;
+      }
+    }
+    
     const newField: FormField = {
       id: `field-${Date.now()}`,
       name: fieldName,
@@ -182,9 +212,8 @@ export function FormConfigAdmin() {
       required: newFieldRequired,
       placeholder: newFieldPlaceholder,
       order: (config.steps.find(s => s.id === activeStepId)?.fields.length || 0) + 1,
-      options: newFieldOptions 
-        ? newFieldOptions.split(',').map(opt => ({ label: opt.trim(), value: opt.trim() }))
-        : undefined,
+      options,
+      subFields,
     };
 
     setConfig({
@@ -204,9 +233,14 @@ export function FormConfigAdmin() {
     setNewFieldRequired(false);
     setNewFieldPlaceholder('');
     setNewFieldOptions('');
+    setUseDefaultDomainConfig(true);
+    setCustomDomainOptions('');
+    setCustomSubFields([]);
     setIsAddFieldOpen(false);
     toast.success('Field added successfully', {
-      description: `Column "${fieldName}" will be created in the backend.`,
+      description: newFieldType === 'domain-investment' 
+        ? `Domain investment field "${newFieldLabel}" added.`
+        : `Column "${fieldName}" will be created in the backend.`,
     });
   };
 
@@ -369,10 +403,16 @@ export function FormConfigAdmin() {
                       step.fields.map((field) => (
                         <div
                           key={field.id}
-                          className="flex items-center justify-between rounded-lg border bg-secondary/20 p-3"
+                          className={cn(
+                            "flex items-center justify-between rounded-lg border bg-secondary/20 p-3",
+                            field.type === 'domain-investment' && "border-primary/30 bg-primary/5"
+                          )}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+                            <div className={cn(
+                              "flex h-8 w-8 items-center justify-center rounded",
+                              field.type === 'domain-investment' ? "bg-primary/20" : "bg-muted"
+                            )}>
                               {fieldTypeIcons[field.type]}
                             </div>
                             <div>
@@ -383,9 +423,20 @@ export function FormConfigAdmin() {
                                     Required
                                   </Badge>
                                 )}
+                                {field.type === 'domain-investment' && (
+                                  <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                                    Dynamic
+                                  </Badge>
+                                )}
                               </p>
                               <p className="text-xs text-muted-foreground font-mono">
                                 {field.name} • {fieldTypeLabels[field.type]}
+                                {field.type === 'domain-investment' && field.options && (
+                                  <span className="ml-1">• {field.options.length} domains</span>
+                                )}
+                                {field.type === 'domain-investment' && field.subFields && (
+                                  <span className="ml-1">• {field.subFields.length} fields each</span>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -490,6 +541,76 @@ export function FormConfigAdmin() {
                 />
               </div>
             )}
+            
+            {/* Domain Investment Configuration */}
+            {newFieldType === 'domain-investment' && (
+              <div className="space-y-4 rounded-lg border bg-secondary/20 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-medium">Use Default Configuration</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Default includes 8 domains and 4 investment fields
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={useDefaultDomainConfig}
+                    onCheckedChange={setUseDefaultDomainConfig}
+                  />
+                </div>
+                
+                {!useDefaultDomainConfig && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <Label className="text-sm">Domain Options (comma-separated)</Label>
+                      <Input 
+                        placeholder="CFP, CPNS, GTI, GTO..."
+                        value={customDomainOptions}
+                        onChange={(e) => setCustomDomainOptions(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Leave empty to use defaults: CFP, CPNS, GTI, GTO, Enterprise, Infrastructure, Security, Data
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm">Sub-Fields</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Default sub-fields: Existing Heads, Deferred Inc., New Ask, Next Phase Ask
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {DEFAULT_DOMAIN_SUBFIELDS.map(sf => (
+                          <Badge key={sf.id} variant="secondary" className="justify-center py-1">
+                            {sf.label}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+                
+                {useDefaultDomainConfig && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Preview</Label>
+                    <div className="flex flex-wrap gap-1">
+                      {DEFAULT_DOMAIN_OPTIONS.slice(0, 4).map(opt => (
+                        <Badge key={opt.value} variant="outline" className="text-xs">
+                          {opt.label}
+                        </Badge>
+                      ))}
+                      <Badge variant="outline" className="text-xs">+4 more</Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {DEFAULT_DOMAIN_SUBFIELDS.map(sf => (
+                        <Badge key={sf.id} variant="secondary" className="text-xs">
+                          {sf.label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label>Placeholder</Label>
               <Input 
