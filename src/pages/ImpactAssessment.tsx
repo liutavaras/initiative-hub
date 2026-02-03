@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -19,7 +20,8 @@ import {
   Clock,
   Users,
   AlertTriangle,
-  Link as LinkIcon
+  Link as LinkIcon,
+  ChevronDown
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Initiative, InitiativeStatus } from '@/types/initiative';
@@ -227,19 +229,41 @@ export default function ImpactAssessment() {
                   </div>
                 </div>
                 <Separator />
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg bg-secondary p-3">
-                    <p className="text-xs font-medium text-secondary-foreground">CFP Domain</p>
-                    <p className="mt-1 text-sm">
-                      {initiative.laborInvestment.domains.CFP.totalNewAsk} new ask
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-secondary p-3">
-                    <p className="text-xs font-medium text-secondary-foreground">CPNS Domain</p>
-                    <p className="mt-1 text-sm">
-                      {initiative.laborInvestment.domains.CPNS.totalNewAsk} new ask
-                    </p>
-                  </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Per Domain Breakdown</p>
+                  {Object.entries(initiative.laborInvestment.domains).map(([domainName, domainData]) => (
+                    <Collapsible key={domainName}>
+                      <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg bg-secondary p-3 hover:bg-secondary/80 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-secondary-foreground">{domainName} Domain</span>
+                          <span className="text-xs text-muted-foreground">
+                            {domainData.totalNewAsk} new ask
+                          </span>
+                        </div>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="px-3 pt-2">
+                        <div className="grid grid-cols-2 gap-3 rounded-lg border bg-muted/30 p-3">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Existing Heads</p>
+                            <p className="text-sm font-semibold">{domainData.existingHeadsCommitted}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Deferred Inc.</p>
+                            <p className="text-sm font-semibold">{domainData.deferredIncremental}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Total New Ask</p>
+                            <p className="text-sm font-semibold text-accent">{domainData.totalNewAsk}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Next Phase Ask</p>
+                            <p className="text-sm font-semibold">{domainData.nextPhaseAsk}</p>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
                 </div>
               </div>
             </CardContent>
