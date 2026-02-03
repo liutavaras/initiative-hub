@@ -54,8 +54,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Briefcase className="h-5 w-5 text-sidebar-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
-                Executive Intake
+              <h1 className="font-display text-xl font-bold text-sidebar-foreground">
+                ExecHub
               </h1>
               <p className="text-xs text-sidebar-foreground/60">Initiative Portal</p>
             </div>
