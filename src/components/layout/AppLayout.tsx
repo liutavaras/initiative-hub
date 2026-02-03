@@ -6,11 +6,11 @@ import {
   Users, 
   BarChart3,
   Menu,
-  Briefcase,
   Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import exechubLogo from '@/assets/exechub-logo.png';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -50,9 +50,11 @@ export function AppLayout({ children }: AppLayoutProps) {
             className="flex h-20 items-center gap-3 border-b border-sidebar-border px-6 hover:bg-sidebar-accent/50 transition-colors"
             onClick={() => setSidebarOpen(false)}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary">
-              <Briefcase className="h-5 w-5 text-sidebar-primary-foreground" />
-            </div>
+            <img 
+              src={exechubLogo} 
+              alt="ExecHub Logo" 
+              className="h-10 w-10 rounded-lg object-cover"
+            />
             <div>
               <h1 className="font-display text-xl font-bold text-sidebar-foreground">
                 ExecHub
