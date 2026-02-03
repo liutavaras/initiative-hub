@@ -59,7 +59,10 @@ export default function Dashboard() {
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="executive-card">
+        <Card 
+          className={`executive-card cursor-pointer transition-all hover:scale-[1.02] ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter('all')}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Initiatives
@@ -68,22 +71,30 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+            <p className="text-xs text-muted-foreground mt-1">Click to view all</p>
           </CardContent>
         </Card>
         
-        <Card className="executive-card">
+        <Card 
+          className={`executive-card cursor-pointer transition-all hover:scale-[1.02] ${statusFilter === 'pending' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter('pending')}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending Review
             </CardTitle>
-            <Clock className="h-4 w-4 text-accent" />
+            <Clock className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">{stats.pending}</div>
+            <div className="text-2xl font-bold text-primary">{stats.pending}</div>
+            <p className="text-xs text-muted-foreground mt-1">Click to filter</p>
           </CardContent>
         </Card>
         
-        <Card className="executive-card">
+        <Card 
+          className={`executive-card cursor-pointer transition-all hover:scale-[1.02] ${statusFilter === 'approved' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter('approved')}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Approved
@@ -92,10 +103,14 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">{stats.approved}</div>
+            <p className="text-xs text-muted-foreground mt-1">Click to filter</p>
           </CardContent>
         </Card>
         
-        <Card className="executive-card">
+        <Card 
+          className={`executive-card cursor-pointer transition-all hover:scale-[1.02] ${statusFilter === 'denied' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => setStatusFilter('denied')}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Denied
@@ -104,6 +119,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">{stats.denied}</div>
+            <p className="text-xs text-muted-foreground mt-1">Click to filter</p>
           </CardContent>
         </Card>
       </div>
