@@ -64,13 +64,13 @@ export default function Dashboard() {
           onClick={() => setStatusFilter('all')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-base font-semibold text-muted-foreground">
               Total Initiatives
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <FileText className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+            <div className="text-3xl font-bold text-foreground">{stats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">Click to view all</p>
           </CardContent>
         </Card>
@@ -80,13 +80,13 @@ export default function Dashboard() {
           onClick={() => setStatusFilter('pending')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-base font-semibold text-muted-foreground">
               Pending Review
             </CardTitle>
-            <Clock className="h-4 w-4 text-primary" />
+            <Clock className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">{stats.pending}</div>
+            <div className="text-3xl font-bold text-primary">{stats.pending}</div>
             <p className="text-xs text-muted-foreground mt-1">Click to filter</p>
           </CardContent>
         </Card>
@@ -96,13 +96,13 @@ export default function Dashboard() {
           onClick={() => setStatusFilter('approved')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-base font-semibold text-muted-foreground">
               Approved
             </CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
+            <CheckCircle className="h-5 w-5 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{stats.approved}</div>
+            <div className="text-3xl font-bold text-success">{stats.approved}</div>
             <p className="text-xs text-muted-foreground mt-1">Click to filter</p>
           </CardContent>
         </Card>
@@ -112,13 +112,13 @@ export default function Dashboard() {
           onClick={() => setStatusFilter('denied')}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-base font-semibold text-muted-foreground">
               Denied
             </CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
+            <XCircle className="h-5 w-5 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{stats.denied}</div>
+            <div className="text-3xl font-bold text-destructive">{stats.denied}</div>
             <p className="text-xs text-muted-foreground mt-1">Click to filter</p>
           </CardContent>
         </Card>
