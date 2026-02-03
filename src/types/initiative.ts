@@ -26,6 +26,7 @@ export interface LaborInvestment {
 
 export interface Initiative {
   id: string;
+  initiativeId: string;
   title: string;
   businessCase: string;
   ownerName: string;
@@ -49,6 +50,8 @@ export interface Initiative {
   lineOfBusiness?: string;
   gtlt?: string;
   product?: string;
+  assessorName?: string;
+  assessedAt?: string;
 }
 
 export interface User {
