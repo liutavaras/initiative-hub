@@ -55,8 +55,8 @@ export function AppLayout({ children }: AppLayoutProps) {
               alt="ExecHub Logo" 
               className="h-10 w-10 rounded-lg object-cover"
             />
-            <h1 className="text-2xl tracking-widest uppercase text-sidebar-foreground">
-              <span className="font-light">EXEC</span><span className="font-bold">HUB</span>
+            <h1 className="text-2xl font-semibold text-sidebar-foreground" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              ExecHub
             </h1>
           </Link>
 
