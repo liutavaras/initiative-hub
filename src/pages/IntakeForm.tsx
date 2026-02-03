@@ -17,15 +17,15 @@ import { ArrowLeft, ArrowRight, Check, FileText, DollarSign, Users, AlertTriangl
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200),
-  businessCase: z.string().min(1, 'Business case is required').max(2000),
-  ownerName: z.string().min(1, 'Owner name is required'),
-  overview: z.string().min(1, 'Overview is required').max(5000),
+  title: z.string().min(1, 'Title is required').max(150, 'Title must be under 150 characters'),
+  businessCase: z.string().min(1, 'Business case is required').max(2000, 'Business case must be under 2000 characters'),
+  ownerName: z.string().min(1, 'Owner name is required').max(100, 'Name must be under 100 characters'),
+  overview: z.string().min(1, 'Overview is required').max(5000, 'Overview must be under 5000 characters'),
   isGTSIG: z.boolean(),
   category: z.enum(['Mandatory', 'Discretionary', 'Regulatory']),
   workType: z.enum(['New', 'Expansion', 'Change to Existing']),
-  requesterStakeholders: z.string().min(1, 'At least one stakeholder required'),
-  sealIds: z.string().optional(),
+  requesterStakeholders: z.string().min(1, 'At least one stakeholder required').max(500, 'Stakeholders must be under 500 characters'),
+  sealIds: z.string().max(200, 'SEAL IDs must be under 200 characters').optional(),
   scopeSizing: z.number().min(0, 'ROM must be positive'),
   timeframe: z.enum(['Multi-Year', 'One Year', '6 Months', 'Quarter', 'Immediate']),
   existingHeadsCommitted: z.number().min(0),
@@ -40,13 +40,14 @@ const formSchema = z.object({
   cpnsDeferred: z.number().min(0),
   cpnsNewAsk: z.number().min(0),
   cpnsNextPhase: z.number().min(0),
-  nonLaborAsk: z.string(),
-  workInScope: z.string().min(1, 'Work in scope is required'),
-  valueROI: z.string().min(1, 'Value/ROI measure is required'),
-  risksIfNotImplemented: z.string().min(1, 'Risks are required'),
-  dependencies: z.string(),
-  resourceAvailability: z.string(),
+  nonLaborAsk: z.string().max(1500, 'Non-labor ask must be under 1500 characters'),
+  workInScope: z.string().min(1, 'Work in scope is required').max(3000, 'Work in scope must be under 3000 characters'),
+  valueROI: z.string().min(1, 'Value/ROI measure is required').max(2000, 'Value/ROI must be under 2000 characters'),
+  risksIfNotImplemented: z.string().min(1, 'Risks are required').max(2000, 'Risks must be under 2000 characters'),
+  dependencies: z.string().max(1500, 'Dependencies must be under 1500 characters'),
+  resourceAvailability: z.string().max(1000, 'Resource availability must be under 1000 characters'),
 });
+
 
 type FormData = z.infer<typeof formSchema>;
 
