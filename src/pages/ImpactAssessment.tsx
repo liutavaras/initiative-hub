@@ -50,7 +50,12 @@ export default function ImpactAssessment() {
     setIsAnimating(true);
     
     setTimeout(() => {
-      setInitiative({ ...initiative, status: decision });
+      setInitiative({ 
+        ...initiative, 
+        status: decision,
+        assessorName: 'Admin User', // Would come from auth context in real app
+        assessedAt: new Date().toISOString(),
+      });
       setIsAnimating(false);
       
       if (decision === 'approved') {
@@ -113,6 +118,7 @@ export default function ImpactAssessment() {
         {/* Title Card */}
         <Card className="executive-card overflow-hidden">
           <div className="executive-header px-6 py-8 text-primary-foreground">
+            <p className="text-sm font-mono text-primary-foreground/70 mb-2">{initiative.initiativeId}</p>
             <h2 className="font-display text-2xl font-bold">{initiative.title}</h2>
             <p className="mt-2 text-primary-foreground/80">{initiative.businessCase}</p>
           </div>
@@ -287,7 +293,7 @@ export default function ImpactAssessment() {
 
         {/* Submission Info */}
         <Card className="executive-card mt-6">
-          <CardContent className="flex items-center justify-between py-4">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 py-4">
             <div className="flex items-center gap-4">
               <Users className="h-5 w-5 text-muted-foreground" />
               <div>
@@ -304,6 +310,26 @@ export default function ImpactAssessment() {
                 </p>
               </div>
             </div>
+            {initiative.assessorName && (
+              <div className="flex items-center gap-4">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Assessed by</p>
+                  <p className="font-medium">{initiative.assessorName}</p>
+                </div>
+              </div>
+            )}
+            {initiative.assessedAt && (
+              <div className="flex items-center gap-4">
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Assessed on</p>
+                  <p className="font-medium">
+                    {format(new Date(initiative.assessedAt), 'MMMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

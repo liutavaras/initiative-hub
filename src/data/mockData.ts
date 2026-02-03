@@ -3,6 +3,7 @@ import { Initiative, User } from '@/types/initiative';
 export const mockInitiatives: Initiative[] = [
   {
     id: '1',
+    initiativeId: 'INI-2024-001',
     title: 'Cloud Infrastructure Modernization',
     businessCase: 'Migrate legacy systems to cloud-native architecture to improve scalability and reduce operational costs by 40%.',
     ownerName: 'Sarah Chen',
@@ -38,6 +39,7 @@ export const mockInitiatives: Initiative[] = [
   },
   {
     id: '2',
+    initiativeId: 'INI-2024-002',
     title: 'Regulatory Compliance Platform',
     businessCase: 'Build centralized compliance management system to meet upcoming GDPR and SOX requirements.',
     ownerName: 'Michael Roberts',
@@ -70,9 +72,12 @@ export const mockInitiatives: Initiative[] = [
     lineOfBusiness: 'Compliance',
     gtlt: 'Risk Management',
     product: 'GRC Platform',
+    assessorName: 'Sarah Chen',
+    assessedAt: '2024-01-12T09:45:00Z',
   },
   {
     id: '3',
+    initiativeId: 'INI-2024-003',
     title: 'Customer Experience Enhancement',
     businessCase: 'Redesign customer-facing portals to improve NPS scores and reduce support ticket volume.',
     ownerName: 'Amanda Foster',
@@ -105,6 +110,8 @@ export const mockInitiatives: Initiative[] = [
     lineOfBusiness: 'Customer Success',
     gtlt: 'Digital Experience',
     product: 'Customer Portal',
+    assessorName: 'Michael Roberts',
+    assessedAt: '2024-01-09T16:30:00Z',
   },
 ];
 

@@ -27,6 +27,7 @@ export function InitiativeCard({ initiative, onClick }: InitiativeCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
+            <p className="text-xs font-mono text-primary mb-1">{initiative.initiativeId}</p>
             <h3 className="font-display text-lg font-semibold text-foreground truncate">
               {initiative.title}
             </h3>
@@ -57,9 +58,17 @@ export function InitiativeCard({ initiative, onClick }: InitiativeCardProps) {
           </div>
         </div>
         
-        <div className="mt-4 flex items-center gap-2 pt-4 border-t">
-          <span className="text-xs text-muted-foreground">Submitted by</span>
-          <span className="text-xs font-medium text-foreground">{initiative.submittedBy}</span>
+        <div className="mt-4 flex flex-col gap-2 pt-4 border-t">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Submitted by</span>
+            <span className="text-xs font-medium text-foreground">{initiative.submittedBy}</span>
+          </div>
+          {initiative.assessorName && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Assessed by</span>
+              <span className="text-xs font-medium text-foreground">{initiative.assessorName}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

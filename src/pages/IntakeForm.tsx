@@ -85,10 +85,17 @@ export default function IntakeForm() {
     },
   });
 
+  const generateInitiativeId = () => {
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(Math.random() * 900) + 100; // 3-digit random number
+    return `INI-${year}-${randomNum}`;
+  };
+
   const onSubmit = (data: FormData) => {
-    console.log('Form submitted:', data);
+    const initiativeId = generateInitiativeId();
+    console.log('Form submitted:', { ...data, initiativeId });
     toast.success('Initiative submitted successfully!', {
-      description: 'Your initiative has been sent for review.',
+      description: `Initiative ${initiativeId} has been sent for review.`,
     });
     navigate('/');
   };

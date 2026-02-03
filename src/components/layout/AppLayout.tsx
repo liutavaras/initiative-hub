@@ -3,12 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   FileText, 
-  CheckSquare, 
   Users, 
   BarChart3,
   Menu,
-  X,
-  Briefcase
+  Briefcase,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,8 +18,6 @@ interface AppLayoutProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'New Initiative', href: '/intake', icon: FileText },
-  { name: 'Impact Assessment', href: '/assessment', icon: CheckSquare },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
   { name: 'Admin', href: '/admin', icon: Users },
 ];
@@ -62,6 +59,16 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-4 py-6">
+            {/* Highlighted New Initiative Button */}
+            <Link
+              to="/intake"
+              onClick={() => setSidebarOpen(false)}
+              className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-200 bg-primary text-primary-foreground hover:bg-primary/90 mb-4"
+            >
+              <Plus className="h-5 w-5" />
+              New Initiative
+            </Link>
+            
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -72,13 +79,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
                   <item.icon className={cn(
                     "h-5 w-5 transition-colors",
-                    isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/70 group-hover:text-sidebar-accent-foreground"
+                    isActive ? "text-primary" : "text-sidebar-foreground/70 group-hover:text-sidebar-accent-foreground"
                   )} />
                   {item.name}
                 </Link>
